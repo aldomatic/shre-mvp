@@ -10,18 +10,19 @@ import UIKit
 import QRCode
 import Alamofire
 import SwiftyJSON
+import FirebaseDatabase
 
 class ViewController: UIViewController {
 
-    
+    // OUTLETS
     @IBOutlet weak var barCodeView: UIImageView!
     
-   
-    
+    // PROPS
+    var ref: FIRDatabaseReference?
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        self.ref = FIRDatabase.database().reference()
         self.barCodeView.image = {
             var qrCode = QRCode("aldomatic")!
             qrCode.size = self.barCodeView.bounds.size
@@ -29,16 +30,8 @@ class ViewController: UIViewController {
             qrCode.color = CIColor(rgba: "F21D41")
             return qrCode.image
         }()
-        
-        
-//        Alamofire.request("https://jsonplaceholder.typicode.com/users").responseJSON { response in
-//            if let data = response.result.value {
-//                let json = JSON(data)
-//                //self.apiResults = json["results"].arrayValue
-//                print(json)
-//            }
-//        }
-
+        //self.saveUserData()
+        self.findByUserName()
     }
 
     override func didReceiveMemoryWarning() {
@@ -47,11 +40,15 @@ class ViewController: UIViewController {
     }
     
     
-    
     func saveUserData(){
-        
-        
-        
+        self.ref?.child("posts").setValue(["body": "Just some sample posts"])
+    }
+    
+    func findByUserName(){
+        self.ref?.child("users").child("aldomatic").observeSingleEvent(of: FIRDataEventType.value, with: { (data) in
+            let json = JSON(data.value as Any)
+            print(json["email"])
+        })
     }
     
     
